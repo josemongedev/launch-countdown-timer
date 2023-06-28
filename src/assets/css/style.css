@@ -261,7 +261,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: end;
-  background: url(./images/pattern-hills.svg);
+  background: url(/launch-countdown-timer/images/pattern-hills.svg);
   gap: 32px;
   width: 100%;
   height: 168px;
