@@ -8,18 +8,26 @@ const hour = minute * 60;
 const day = hour * 24;
 
 window.onload = () => {
-  const eventDay = new Date("12/20/2023");
+  const eventDay = new Date("07/20/2023");
+  let previousTimeRemaining;
 
   // Elements
-  const days = document.querySelectorAll(".days__flipcard span");
-  const hours = document.querySelectorAll(".hours__flipcard span");
-  const minutes = document.querySelectorAll(".minutes__flipcard span");
-  const seconds = document.querySelectorAll(".seconds__flipcard span");
+  const daysCtrs = document.querySelectorAll(".days__flipcard span");
+  const hoursCtrs = document.querySelectorAll(".hours__flipcard span");
+  const minutesCtrs = document.querySelectorAll(".minutes__flipcard span");
+  const secondsCtrs = document.querySelectorAll(".seconds__flipcard span");
+  const containers = {
+    day: document.querySelectorAll(".days__flipcard .fcontent")[0],
+    hour: document.querySelectorAll(".hours__flipcard .fcontent")[0],
+    minute: document.querySelectorAll(".minutes__flipcard .fcontent")[0],
+    second: document.querySelectorAll(".seconds__flipcard .fcontent")[0],
+  };
 
   // Handlers
-  const updateCounter = function (elements, timeRemaining) {
+  const updateCounter = function (elements, count, countType) {
+    const paddedCount = count < 10 ? "0" + String(count) : String(count);
     elements.forEach((el) => {
-      el.innerHTML = timeRemaining < 10 ? "0" + timeRemaining : timeRemaining;
+      el.innerText = paddedCount;
     });
   };
 
@@ -27,10 +35,10 @@ window.onload = () => {
     const getCount = (adjustedDistance, timeConstant) =>
       Math.floor(adjustedDistance / timeConstant);
 
-    const days = getCount(distance, day);
-    const hours = getCount(distance % day, hour);
-    const minutes = getCount(distance % hour, minute);
-    const seconds = getCount(distance % minute, second);
+    const days = getCount(distance, day, "day");
+    const hours = getCount(distance % day, hour, "hour");
+    const minutes = getCount(distance % hour, minute, "minute");
+    const seconds = getCount(distance % minute, second, "second");
     return {
       days,
       hours,
@@ -46,19 +54,51 @@ window.onload = () => {
     if (distance < 0) {
       count.expired = true;
       clearInterval(count.interval);
-      updateCounter(days, 0);
-      updateCounter(hours, 0);
-      updateCounter(minutes, 0);
-      updateCounter(seconds, 0);
+      updateCounter(daysCtrs, 0);
+      updateCounter(hoursCtrs, 0);
+      updateCounter(minutesCtrs, 0);
+      updateCounter(secondsCtrs, 0);
       return;
     }
     const timeRemaining = getRemainigTime(distance);
-    updateCounter(days, timeRemaining.days);
-    updateCounter(hours, timeRemaining.hours);
-    updateCounter(minutes, timeRemaining.minutes);
-    updateCounter(seconds, timeRemaining.seconds);
+
+    if (timeRemaining.days !== previousTimeRemaining.days) {
+      updateCounter(daysCtrs, timeRemaining.days);
+      containers.day.classList.add("fanimate");
+    } else containers.day.classList.remove("fanimate");
+
+    if (timeRemaining.hours !== previousTimeRemaining.hours) {
+      updateCounter(hoursCtrs, timeRemaining.hours);
+      containers.hour.classList.add("fanimate");
+    } else containers.hour.classList.remove("fanimate");
+
+    if (timeRemaining.minutes !== previousTimeRemaining.minutes) {
+      updateCounter(minutesCtrs, timeRemaining.minutes);
+      containers.minute.classList.add("fanimate");
+    } else containers.minute.classList.remove("fanimate");
+
+    updateCounter(secondsCtrs, timeRemaining.seconds);
+    previousTimeRemaining = timeRemaining;
   };
 
+  const initCounter = function (elements, count, countType) {
+    const paddedCount = count < 10 ? "0" + String(count) : String(count);
+    elements.forEach((el) => {
+      el.innerText = paddedCount;
+    });
+  };
+
+  const initialization = () => {
+    const now = new Date();
+    const distance = eventDay - now;
+    previousTimeRemaining = getRemainigTime(distance);
+    initCounter(daysCtrs, previousTimeRemaining.days);
+    initCounter(hoursCtrs, previousTimeRemaining.hours);
+    initCounter(minutesCtrs, previousTimeRemaining.minutes);
+    initCounter(secondsCtrs, previousTimeRemaining.seconds);
+  };
+
+  initialization();
   // Timer
   const count = {
     value: 0,
